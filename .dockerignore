@@ -1,0 +1,7 @@
+.venv
+OCRE
+.git
+__pycache__
+**pycache**
+*.ipynb
+.ipynb_checkpoints

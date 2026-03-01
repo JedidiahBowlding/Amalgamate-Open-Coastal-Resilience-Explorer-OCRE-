@@ -1,0 +1,50 @@
+{
+  "location_key": "annapolis",
+  "location": "Annapolis, MD",
+  "lat": 38.9784,
+  "lon": -76.4922,
+  "data_range": "2020-2021",
+  "mean_trend_mm_per_year": -14.956,
+  "extreme_events": [
+    {
+      "date": "2021-10-30",
+      "level_m": 1.247
+    },
+    {
+      "date": "2021-10-29",
+      "level_m": 1.132
+    },
+    {
+      "date": "2020-04-30",
+      "level_m": 1.022
+    },
+    {
+      "date": "2020-05-01",
+      "level_m": 0.908
+    },
+    {
+      "date": "2020-04-13",
+      "level_m": 0.824
+    }
+  ],
+  "annual_mean_levels": [
+    {
+      "year": 2020,
+      "level_m": 0.1642
+    },
+    {
+      "year": 2021,
+      "level_m": 0.1492
+    }
+  ],
+  "observation_comparison": {
+    "nearest_station": {
+      "station_id": "8575512",
+      "station_name": "Annapolis",
+      "lat": 38.983883,
+      "lon": -76.480034
+    },
+    "observation_count": 17544
+  },
+  "interpretive_summary": "Between 2020-2021, modeled water levels near Annapolis, MD increased at an average rate of -15.0 mm per year. Historical extreme water levels exceeded 1.25 meters during major storm events. Observational data from NOAA station 8575512 (17,544 records) supports local long-term trend interpretation."
+}

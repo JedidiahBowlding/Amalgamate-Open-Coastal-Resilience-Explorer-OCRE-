@@ -1,0 +1,12 @@
+{
+  "annapolis": {
+    "name": "Annapolis, MD",
+    "lat": 38.9784,
+    "lon": -76.4922
+  },
+  "norfolk": {
+    "name": "Norfolk, VA",
+    "lat": 36.8508,
+    "lon": -76.2859
+  }
+}

@@ -9,11 +9,11 @@ import pandas as pd
 import requests
 
 
-DEFAULT_LOCATION = "Annapolis, MD"
-DEFAULT_LAT = 38.9784
-DEFAULT_LON = -76.4922
+DEFAULT_LOCATION_KEY = "annapolis"
 DEFAULT_START_YEAR = 1979
 DEFAULT_END_YEAR = 2022
+DEFAULT_LOCATIONS_CONFIG = Path("config/locations.json")
+DEFAULT_OUTPUT_DIR = Path("pilot-backend/data")
 
 CATALOG_URLS = [
     "s3://noaa-nos-cora-pds/CORA_V1.1_intake.yml",
@@ -53,6 +53,33 @@ def _open_cora_dataset():
     raise RuntimeError(
         "Unable to open CORA intake catalog/dataset with the configured URLs/keys."
     ) from last_error
+
+
+def load_locations(config_path: Path) -> dict[str, dict[str, Any]]:
+    if not config_path.exists():
+        raise FileNotFoundError(f"Location config not found: {config_path}")
+
+    with config_path.open("r", encoding="utf-8") as f:
+        locations = json.load(f)
+
+    if not isinstance(locations, dict):
+        raise ValueError("locations.json must be a dictionary keyed by location key")
+
+    return cast(dict[str, dict[str, Any]], locations)
+
+
+def get_location_metadata(config_path: Path, location_key: str) -> dict[str, Any]:
+    locations = load_locations(config_path)
+    if location_key not in locations:
+        available = ", ".join(sorted(locations.keys()))
+        raise KeyError(f"Unknown location key '{location_key}'. Available keys: {available}")
+
+    location = locations[location_key]
+    for field in ("name", "lat", "lon"):
+        if field not in location:
+            raise ValueError(f"Location '{location_key}' missing required field: {field}")
+
+    return location
 
 
 def extract_timeseries(
@@ -232,6 +259,7 @@ def nearest_nwlon_station(lat: float, lon: float) -> dict[str, Any]:
 
 
 def build_mvp_output(
+    location_key: str,
     location: str,
     lat: float,
     lon: float,
@@ -244,6 +272,7 @@ def build_mvp_output(
     trend = _compute_trend_mm_per_year(annual)
 
     output = {
+        "location_key": location_key,
         "location": location,
         "lat": lat,
         "lon": lon,
@@ -302,8 +331,9 @@ def build_interpretive_summary(mvp: dict[str, Any]) -> str:
 def export_outputs(output_dir: Path, timeseries_df: pd.DataFrame, mvp_payload: dict[str, Any]) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
 
-    timeseries_file = output_dir / "annapolis_timeseries.json"
-    mvp_file = output_dir / "annapolis_mvp.json"
+    location_key = str(mvp_payload["location_key"])
+    timeseries_file = output_dir / f"{location_key}_timeseries.json"
+    mvp_file = output_dir / f"{location_key}_mvp.json"
 
     timeseries_df.to_json(timeseries_file, orient="records", date_format="iso")
 
@@ -313,24 +343,29 @@ def export_outputs(output_dir: Path, timeseries_df: pd.DataFrame, mvp_payload: d
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Extract OCRE pilot water-level time series (from CORA source data) and MVP JSON payload.")
-    parser.add_argument("--location", default=DEFAULT_LOCATION)
-    parser.add_argument("--lat", type=float, default=DEFAULT_LAT)
-    parser.add_argument("--lon", type=float, default=DEFAULT_LON)
+    parser.add_argument("--location-key", default=DEFAULT_LOCATION_KEY)
+    parser.add_argument("--locations-config", type=Path, default=DEFAULT_LOCATIONS_CONFIG)
     parser.add_argument("--start-year", type=int, default=DEFAULT_START_YEAR)
     parser.add_argument("--end-year", type=int, default=DEFAULT_END_YEAR)
     parser.add_argument("--top-events", type=int, default=5)
-    parser.add_argument("--output-dir", type=Path, default=Path("pilot-backend"))
+    parser.add_argument("--output-dir", type=Path, default=DEFAULT_OUTPUT_DIR)
     parser.add_argument("--with-observations", action="store_true")
     args = parser.parse_args()
 
     if args.end_year < args.start_year:
         raise ValueError("end-year must be greater than or equal to start-year")
 
-    ts_df = extract_timeseries(args.lat, args.lon, args.start_year, args.end_year)
+    location = get_location_metadata(args.locations_config, args.location_key)
+    location_name = str(location["name"])
+    lat = float(location["lat"])
+    lon = float(location["lon"])
+
+    ts_df = extract_timeseries(lat, lon, args.start_year, args.end_year)
     mvp = build_mvp_output(
-        location=args.location,
-        lat=args.lat,
-        lon=args.lon,
+        location_key=args.location_key,
+        location=location_name,
+        lat=lat,
+        lon=lon,
         start_year=args.start_year,
         end_year=args.end_year,
         df=ts_df,
@@ -338,7 +373,7 @@ def main() -> None:
     )
 
     if args.with_observations:
-        nearest = nearest_nwlon_station(args.lat, args.lon)
+        nearest = nearest_nwlon_station(lat, lon)
         begin_date = f"{args.start_year}0101"
         end_date = f"{args.end_year}1231"
         obs_df = fetch_nwlon_hourly_height(nearest["station_id"], begin_date, end_date)

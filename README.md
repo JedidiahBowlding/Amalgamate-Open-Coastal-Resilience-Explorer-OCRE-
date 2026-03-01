@@ -1,6 +1,6 @@
 # Open-Coastal-Resilience-Explorer-OCRE
 
-This project uses NOAA CORA notebooks and scripts to build an open coastal resilience pilot for Annapolis, MD.
+This project uses NOAA CORA data to build a multi-location open coastal resilience platform.
 
 ## Baseline Tagging
 Use this to freeze your pilot baseline:
@@ -10,6 +10,17 @@ git add .
 git commit -m "v0.1 - Annapolis full CORA + NWLON extraction successful"
 git tag v0.1
 git push && git push --tags
+```
+
+## v0.2 Release Tagging
+After v0.2 changes are validated:
+
+```bash
+git add .
+git commit -m "v0.2 - multi-location scalable + dockerized API"
+git tag v0.2
+git push
+git push origin v0.2
 ```
 
 # Overview
@@ -26,25 +37,25 @@ conda activate ocre
 jupyter notebook
 ```
 
-# Pilot Backend (Annapolis, MD)
-For a script-first workflow (without long-term notebook dependency), use the pilot backend:
+# Multi-Location Backend (v0.2)
+The extractor now reads location metadata from `config/locations.json` and writes location-specific output files.
 
 ```bash
 python pilot-backend/extract_ocre_data.py \
-  --location "Annapolis, MD" \
-  --lat 38.9784 \
-  --lon -76.4922 \
+  --location-key annapolis \
   --start-year 1979 \
-  --end-year 2022
+  --end-year 2022 \
+  --with-observations
 ```
 
 Outputs:
-- `pilot-backend/annapolis_timeseries.json`: hourly modeled water levels
-- `pilot-backend/annapolis_mvp.json`: API-ready payload with trend, extremes, and annual means
+- `pilot-backend/data/{location_key}_timeseries.json`: hourly modeled water levels
+- `pilot-backend/data/{location_key}_mvp.json`: API-ready payload with trend, extremes, annual means, and summary
 
-Optional observational metadata can be added with:
+Build all configured locations in one command:
+
 ```bash
-python pilot-backend/extract_ocre_data.py --with-observations
+python pilot-backend/build_all_locations.py --with-observations
 ```
 
 # API Wrapper
@@ -55,10 +66,19 @@ uvicorn api.main:app --reload
 ```
 
 Key endpoints:
-- `GET /annapolis`
-- `GET /annapolis/summary`
-- `GET /pilot/annapolis`
-- `GET /pilot/annapolis/timeseries`
+- `GET /health`
+- `GET /locations`
+- `GET /location/{location_key}`
+- `GET /location/{location_key}/summary`
+- `GET /location/{location_key}/timeseries`
+
+Example:
+
+```bash
+curl http://127.0.0.1:8000/locations
+curl http://127.0.0.1:8000/location/annapolis
+curl http://127.0.0.1:8000/location/norfolk/summary
+```
 
 # Visualization MVP
 Open the minimal dashboard:
@@ -66,11 +86,37 @@ Open the minimal dashboard:
 `web/dashboard.html`
 
 It includes:
+- Location selector (dynamic from API)
 - Top panel: location, data range, trend (mm/year)
 - Line chart: annual mean water levels
 - Event panel: top 5 extremes
 - Comparison badge: observed records compared
 - Interpretive summary paragraph
+
+# Docker Deployment
+Build and run locally:
+
+```bash
+docker build -t ocre-api .
+docker run -p 8000:8000 ocre-api
+```
+
+Verify:
+
+```bash
+curl http://127.0.0.1:8000/health
+curl http://127.0.0.1:8000/locations
+```
+
+Deployment options:
+- Option A: DigitalOcean Droplet (install Docker, pull repo, build image, run with restart policy)
+- Option B: Fly.io (`fly launch`, `fly deploy`)
+- Option C: Railway (connect GitHub repo, deploy container)
+
+Production checklist:
+- Public API URL
+- CORS configured (`localhost` + production domain)
+- Version endpoint returns `v0.2`
 
 Minimal pilot structure in this repository:
 - `pilot-backend/extract_ocre_data.py`

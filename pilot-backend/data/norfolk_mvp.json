@@ -1,0 +1,50 @@
+{
+  "location_key": "norfolk",
+  "location": "Norfolk, VA",
+  "lat": 36.8508,
+  "lon": -76.2859,
+  "data_range": "2020-2021",
+  "mean_trend_mm_per_year": -8.468,
+  "extreme_events": [
+    {
+      "date": "2021-10-10",
+      "level_m": 1.257
+    },
+    {
+      "date": "2021-11-07",
+      "level_m": 1.238
+    },
+    {
+      "date": "2020-04-01",
+      "level_m": 1.2
+    },
+    {
+      "date": "2021-05-30",
+      "level_m": 1.192
+    },
+    {
+      "date": "2020-09-21",
+      "level_m": 1.186
+    }
+  ],
+  "annual_mean_levels": [
+    {
+      "year": 2020,
+      "level_m": 0.1547
+    },
+    {
+      "year": 2021,
+      "level_m": 0.1463
+    }
+  ],
+  "observation_comparison": {
+    "nearest_station": {
+      "station_id": "8639348",
+      "station_name": "Money Point",
+      "lat": 36.778194,
+      "lon": -76.301865
+    },
+    "observation_count": 17544
+  },
+  "interpretive_summary": "Between 2020-2021, modeled water levels near Norfolk, VA increased at an average rate of -8.5 mm per year. Historical extreme water levels exceeded 1.26 meters during major storm events. Observational data from NOAA station 8639348 (17,544 records) supports local long-term trend interpretation."
+}

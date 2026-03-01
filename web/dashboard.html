@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OCRE Annapolis Dashboard</title>
+  <title>OCRE Multi-Location Dashboard</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 24px; background: #f7f9fc; color: #1f2937; }
     .grid { display: grid; grid-template-columns: 1fr; gap: 16px; max-width: 1000px; margin: 0 auto; }
@@ -22,6 +22,10 @@
   <div class="grid">
     <div class="card">
       <h2>Open-Coastal-Resilience-Explorer-OCRE</h2>
+      <div style="margin-bottom: 12px;">
+        <label for="locationSelect" style="font-weight: 600; margin-right: 8px;">Location:</label>
+        <select id="locationSelect"></select>
+      </div>
       <div class="top">
         <div class="kpi"><div class="label">Location</div><div id="location" class="value">-</div></div>
         <div class="kpi"><div class="label">Data Range</div><div id="range" class="value">-</div></div>
@@ -82,8 +86,8 @@
       ctx.stroke();
     }
 
-    async function loadDashboard() {
-      const res = await fetch('http://127.0.0.1:8000/annapolis');
+    async function loadDashboard(locationKey) {
+      const res = await fetch(`http://127.0.0.1:8000/location/${locationKey}`);
       const data = await res.json();
 
       document.getElementById('location').textContent = data.location;
@@ -108,7 +112,31 @@
       drawLineChart(canvas, data.annual_mean_levels || []);
     }
 
-    loadDashboard().catch(err => {
+    async function init() {
+      const res = await fetch('http://127.0.0.1:8000/locations');
+      const payload = await res.json();
+      const locations = payload.locations || {};
+      const select = document.getElementById('locationSelect');
+
+      Object.entries(locations).forEach(([key, meta]) => {
+        const opt = document.createElement('option');
+        opt.value = key;
+        opt.textContent = meta.name || key;
+        select.appendChild(opt);
+      });
+
+      if (!select.value) {
+        const first = Object.keys(locations)[0];
+        if (first) select.value = first;
+      }
+
+      select.addEventListener('change', () => loadDashboard(select.value));
+      if (select.value) {
+        await loadDashboard(select.value);
+      }
+    }
+
+    init().catch(err => {
       document.getElementById('summary').textContent = `Failed to load API data: ${err.message}`;
       document.getElementById('badge').textContent = 'API unavailable';
     });
