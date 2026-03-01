@@ -1,4 +1,4 @@
-name: cora
+name: ocre
 channels:
   - defaults
 dependencies:

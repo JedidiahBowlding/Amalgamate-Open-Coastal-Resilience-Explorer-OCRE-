@@ -1,4 +1,6 @@
-# Coastal Ocean Reanalysis (CORA) Notebooks
+# Open-Coastal-Resilience-Explorer-OCRE
+
+This project uses NOAA CORA notebooks and scripts to build an open coastal resilience pilot for Annapolis, MD.
 
 # Overview
 NOAA’s Coastal Ocean Reanalysis (CORA) provides modeled historical water levels and waves for the Atlantic, Gulf, and Caribbean from 1979-2022. The reanalysis was performed through the partnership of NOAA National Ocean Service (NOS) and University of North Carolina’s (UNC) Institute of Marine Sciences and Renaissance Computing Institute ([RENCI](https://renci.org/)). Modeling was performed by ’s  RENCI, and couples ADvanced CIRCulation Model ([ADCIRC](https://www.erdc.usace.army.mil/Media/Fact-Sheets/Fact-Sheet-Article-View/Article/476698/advanced-circulation-model/)) and Simulating WAves Nearshore ([SWAN](https://swanmodel.sourceforge.io/)) to produce data points every 300 to 500 meters. Hourly water level observations from NOAA’s Center for Operational Oceanographic Products and Services (CO-OPS) [National Water Level Observation Network](https://tidesandcurrents.noaa.gov/) (NWLON) were both assimilated into modeling, and used for [validation](https://www.frontiersin.org/journals/marine-science/articles/10.3389/fmars.2024.1381228/full?utm_source=Email_to_authors_&utm_medium=Email&utm_content=T1_11.5e1_author&utm_campaign=Email_publication&field&journalName=Frontiers_in_Marine_Science&id=1381228) of results. This repository hosts Jupyter notebooks to help users access, analyze, and visualize CORA datasets hosted via [Amazon Web Services](https://noaa-nos-cora-pds.s3.amazonaws.com/index.html) on [NOAA’s Open Data Dissemination](https://www.noaa.gov/information-technology/open-data-dissemination) (NODD) Platform. All previous versions (Eg. Version 0.9 used for validation, and version 1.0 used for prototyping) are considered preliminary versions and should be superseded with version 1.1 for operational use. All code is dependent on Python libraries outlined in each notebook. Please ensure you are able to access and install each for optimal performance. Please see the [NOAA Technical Report](https://tidesandcurrents.noaa.gov/cora.html#publications) for additional information. 
@@ -7,10 +9,10 @@ NOAA’s Coastal Ocean Reanalysis (CORA) provides modeled historical water level
 # Usage
 An environment.yml file is included to create an Anaconda environment in which to run the notebooks. To run the notebooks, you can use the following steps:
 ```bash
-git clone https://github.com/NOAA-CO-OPS/CORA-Coastal-Ocean-ReAnalysis-CORA.git
-cd CORA-Coastal-Ocean-ReAnalysis-CORA
+git clone <your-Open-Coastal-Resilience-Explorer-OCRE-repo-url>
+cd Open-Coastal-Resilience-Explorer-OCRE
 conda env create -f environment.yml
-conda activate cora
+conda activate ocre
 jupyter notebook
 ```
 
@@ -18,7 +20,7 @@ jupyter notebook
 For a script-first workflow (without long-term notebook dependency), use the pilot backend:
 
 ```bash
-python pilot-backend/extract_cora_data.py \
+python pilot-backend/extract_ocre_data.py \
   --location "Annapolis, MD" \
   --lat 38.9784 \
   --lon -76.4922 \
@@ -32,11 +34,11 @@ Outputs:
 
 Optional observational metadata can be added with:
 ```bash
-python pilot-backend/extract_cora_data.py --with-observations
+python pilot-backend/extract_ocre_data.py --with-observations
 ```
 
 Minimal pilot structure in this repository:
-- `pilot-backend/extract_cora_data.py`
+- `pilot-backend/extract_ocre_data.py`
 - `api/main.py`
 - `web/` (frontend placeholder)
 - `docs/Data_Management_Plan.md`
@@ -47,19 +49,19 @@ Pilot scope note:
 
 
 # Notebooks:
-## 1.  CORA_Accessing_Data.ipynb
+## 1.  OCRE_Accessing_Data.ipynb
 This notebook demonstrates how users can access CORA datasets on NOAA's Open Data Dissemination (NODD) Platform through Amazon Web Services. Model data is extracted  from the nearest model node to a user-specified geographic coordinates and displayed in a timeseries plot. 
 
-## 2.  CORA_Visualize_Water_Levels.ipynb
+## 2.  OCRE_Visualize_Water_Levels.ipynb
 This notebook demonstrates how users can access CORA datasets on NOAA's Open Data Dissemination (NODD) Platform through Amazon Web Services and create a 2-dimensional water level surface plot.
 
-## 3.  CORA_Plot_Mesh.ipynb
+## 3.  OCRE_Plot_Mesh.ipynb
 Interested in viewing the bathymetry or mesh that was used in the model to create the CORA data? This notebook allows users to create a rasterized plot of the topobathy at the CORA model nodes and overlay the model mesh.
 
-## 4.  CORA_Convert_Datums.ipynb
+## 4.  OCRE_Convert_Datums.ipynb
 This notebook allows users to upload a .csv file of extracted CORA time series and run it through [NOAA’s Tidal Analysis Datum Calculator](https://access.co-ops.nos.noaa.gov/datumcalc/) ([TADC](https://github.com/NOAA-CO-OPS/CO-OPS-Tidal-Analysis-Datum-Calculator)) to convert data from Mean Sea Level (MSL) to other Datums. To run this notebook it will be necessary to also have the Python script and config file for the calculator, which are available on the GitHub repository.
 
-## 5.  CORA_Compare_Time-Series.ipynb
+## 5.  OCRE_Compare_Time-Series.ipynb
 This notebook retrieves observed hourly water levels from NWLON stations using CO-OPS [Data API](https://tidesandcurrents.noaa.gov/api-helper/url-generator.html) to compare with CORA data corresponding to the same location. 
 
 # <code style="color : cyan">Change Log</code>
@@ -110,4 +112,3 @@ This repository is a scientific product and is not official communication of the
 # License
 
 Software code created by U.S. Government employees is not subject to copyright in the United States (17 U.S.C. �105). The United States/Department of Commerce reserves all rights to seek and obtain copyright protection in countries other than the United States for Software authored in its entirety by the Department of Commerce. To this end, the Department of Commerce hereby grants to Recipient a royalty-free, nonexclusive license to use, copy, and create derivative works of the Software outside of the United States.
-# Amalgamate-Open-Coastal-Resilience-Explorer-OCRE-

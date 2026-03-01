@@ -1,4 +1,4 @@
-# Web (Next.js Placeholder)
+# Open-Coastal-Resilience-Explorer-OCRE Web (Next.js Placeholder)
 
 This folder is reserved for the pilot frontend.
 

@@ -178,7 +178,7 @@ def fetch_nwlon_hourly_height(
 
         params = {
             "product": "hourly_height",
-            "application": "cora-pilot",
+            "application": "open-coastal-resilience-explorer-ocre",
             "begin_date": chunk_start.strftime("%Y%m%d"),
             "end_date": chunk_end.strftime("%Y%m%d"),
             "station": station_id,
@@ -275,7 +275,7 @@ def export_outputs(output_dir: Path, timeseries_df: pd.DataFrame, mvp_payload: d
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Extract CORA water-level time series and MVP JSON payload.")
+    parser = argparse.ArgumentParser(description="Extract OCRE pilot water-level time series (from CORA source data) and MVP JSON payload.")
     parser.add_argument("--location", default=DEFAULT_LOCATION)
     parser.add_argument("--lat", type=float, default=DEFAULT_LAT)
     parser.add_argument("--lon", type=float, default=DEFAULT_LON)

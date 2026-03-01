@@ -1,4 +1,4 @@
-# Data Management Plan (Pilot)
+# Open-Coastal-Resilience-Explorer-OCRE Data Management Plan (Pilot)
 
 ## Scope
 - Pilot location: Annapolis, MD (38.9784, -76.4922)
@@ -15,6 +15,6 @@
 - Wave datasets are excluded in this pilot due to known v1.1 anomaly notice
 
 ## Access and Reproducibility
-- Backend extraction script: `pilot-backend/extract_cora_data.py`
+- Backend extraction script: `pilot-backend/extract_ocre_data.py`
 - API layer: `api/main.py`
 - Environment: `environment.yml`
