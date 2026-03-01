@@ -212,5 +212,6 @@
       "lon": -76.480034
     },
     "observation_count": 380719
-  }
+  },
+  "interpretive_summary": "Between 1979-2022, modeled water levels near Annapolis, MD increased at an average rate of 4.9 mm per year. Historical extreme water levels exceeded 1.79 meters during major storm events. Observational data from NOAA station 8575512 (380,719 records) supports local long-term trend interpretation."
 }

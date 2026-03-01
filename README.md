@@ -2,6 +2,16 @@
 
 This project uses NOAA CORA notebooks and scripts to build an open coastal resilience pilot for Annapolis, MD.
 
+## Baseline Tagging
+Use this to freeze your pilot baseline:
+
+```bash
+git add .
+git commit -m "v0.1 - Annapolis full CORA + NWLON extraction successful"
+git tag v0.1
+git push && git push --tags
+```
+
 # Overview
 NOAA’s Coastal Ocean Reanalysis (CORA) provides modeled historical water levels and waves for the Atlantic, Gulf, and Caribbean from 1979-2022. The reanalysis was performed through the partnership of NOAA National Ocean Service (NOS) and University of North Carolina’s (UNC) Institute of Marine Sciences and Renaissance Computing Institute ([RENCI](https://renci.org/)). Modeling was performed by ’s  RENCI, and couples ADvanced CIRCulation Model ([ADCIRC](https://www.erdc.usace.army.mil/Media/Fact-Sheets/Fact-Sheet-Article-View/Article/476698/advanced-circulation-model/)) and Simulating WAves Nearshore ([SWAN](https://swanmodel.sourceforge.io/)) to produce data points every 300 to 500 meters. Hourly water level observations from NOAA’s Center for Operational Oceanographic Products and Services (CO-OPS) [National Water Level Observation Network](https://tidesandcurrents.noaa.gov/) (NWLON) were both assimilated into modeling, and used for [validation](https://www.frontiersin.org/journals/marine-science/articles/10.3389/fmars.2024.1381228/full?utm_source=Email_to_authors_&utm_medium=Email&utm_content=T1_11.5e1_author&utm_campaign=Email_publication&field&journalName=Frontiers_in_Marine_Science&id=1381228) of results. This repository hosts Jupyter notebooks to help users access, analyze, and visualize CORA datasets hosted via [Amazon Web Services](https://noaa-nos-cora-pds.s3.amazonaws.com/index.html) on [NOAA’s Open Data Dissemination](https://www.noaa.gov/information-technology/open-data-dissemination) (NODD) Platform. All previous versions (Eg. Version 0.9 used for validation, and version 1.0 used for prototyping) are considered preliminary versions and should be superseded with version 1.1 for operational use. All code is dependent on Python libraries outlined in each notebook. Please ensure you are able to access and install each for optimal performance. Please see the [NOAA Technical Report](https://tidesandcurrents.noaa.gov/cora.html#publications) for additional information. 
 
@@ -36,6 +46,31 @@ Optional observational metadata can be added with:
 ```bash
 python pilot-backend/extract_ocre_data.py --with-observations
 ```
+
+# API Wrapper
+Run API service:
+
+```bash
+uvicorn api.main:app --reload
+```
+
+Key endpoints:
+- `GET /annapolis`
+- `GET /annapolis/summary`
+- `GET /pilot/annapolis`
+- `GET /pilot/annapolis/timeseries`
+
+# Visualization MVP
+Open the minimal dashboard:
+
+`web/dashboard.html`
+
+It includes:
+- Top panel: location, data range, trend (mm/year)
+- Line chart: annual mean water levels
+- Event panel: top 5 extremes
+- Comparison badge: observed records compared
+- Interpretive summary paragraph
 
 Minimal pilot structure in this repository:
 - `pilot-backend/extract_ocre_data.py`

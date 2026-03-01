@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OCRE Annapolis Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; background: #f7f9fc; color: #1f2937; }
+    .grid { display: grid; grid-template-columns: 1fr; gap: 16px; max-width: 1000px; margin: 0 auto; }
+    .card { background: white; border: 1px solid #e5e7eb; border-radius: 10px; padding: 16px; }
+    .top { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .kpi { background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 8px; padding: 12px; }
+    .kpi .label { font-size: 12px; color: #6b7280; }
+    .kpi .value { font-size: 20px; font-weight: 700; }
+    canvas { width: 100%; height: 280px; border: 1px solid #e5e7eb; border-radius: 8px; }
+    ul { margin: 8px 0 0 20px; }
+    .badge { display: inline-block; padding: 8px 12px; border-radius: 999px; background: #e0f2fe; color: #075985; font-weight: 600; }
+    .summary { line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <div class="grid">
+    <div class="card">
+      <h2>Open-Coastal-Resilience-Explorer-OCRE</h2>
+      <div class="top">
+        <div class="kpi"><div class="label">Location</div><div id="location" class="value">-</div></div>
+        <div class="kpi"><div class="label">Data Range</div><div id="range" class="value">-</div></div>
+        <div class="kpi"><div class="label">Trend</div><div id="trend" class="value">-</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>Annual Mean Water Levels</h3>
+      <canvas id="annualChart" width="920" height="300"></canvas>
+    </div>
+
+    <div class="card">
+      <h3>Top 5 Extreme Water Events</h3>
+      <ul id="events"></ul>
+    </div>
+
+    <div class="card">
+      <h3>Comparison Badge</h3>
+      <div id="badge" class="badge">Loading...</div>
+    </div>
+
+    <div class="card">
+      <h3>Interpretive Summary</h3>
+      <div id="summary" class="summary">Loading...</div>
+    </div>
+  </div>
+
+  <script>
+    function drawLineChart(canvas, points) {
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (!points.length) return;
+
+      const pad = 40;
+      const xs = points.map(p => p.year);
+      const ys = points.map(p => p.level_m);
+      const minX = Math.min(...xs), maxX = Math.max(...xs);
+      const minY = Math.min(...ys), maxY = Math.max(...ys);
+
+      const sx = x => pad + ((x - minX) / (maxX - minX || 1)) * (canvas.width - pad * 2);
+      const sy = y => canvas.height - pad - ((y - minY) / (maxY - minY || 1)) * (canvas.height - pad * 2);
+
+      ctx.strokeStyle = '#9ca3af';
+      ctx.beginPath();
+      ctx.moveTo(pad, pad);
+      ctx.lineTo(pad, canvas.height - pad);
+      ctx.lineTo(canvas.width - pad, canvas.height - pad);
+      ctx.stroke();
+
+      ctx.strokeStyle = '#2563eb';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      points.forEach((p, i) => {
+        const x = sx(p.year), y = sy(p.level_m);
+        if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+    }
+
+    async function loadDashboard() {
+      const res = await fetch('http://127.0.0.1:8000/annapolis');
+      const data = await res.json();
+
+      document.getElementById('location').textContent = data.location;
+      document.getElementById('range').textContent = data.data_range;
+      document.getElementById('trend').textContent = `${data.mean_trend_mm_per_year} mm/yr`;
+
+      const eventList = document.getElementById('events');
+      eventList.innerHTML = '';
+      (data.extreme_events || []).slice(0, 5).forEach(e => {
+        const li = document.createElement('li');
+        li.textContent = `${e.date}: ${e.level_m} m`;
+        eventList.appendChild(li);
+      });
+
+      const count = data?.observation_comparison?.observation_count;
+      document.getElementById('badge').textContent =
+        Number.isFinite(count) ? `${count.toLocaleString()} observed records compared` : 'Observation comparison unavailable';
+
+      document.getElementById('summary').textContent = data.interpretive_summary || 'Summary unavailable';
+
+      const canvas = document.getElementById('annualChart');
+      drawLineChart(canvas, data.annual_mean_levels || []);
+    }
+
+    loadDashboard().catch(err => {
+      document.getElementById('summary').textContent = `Failed to load API data: ${err.message}`;
+      document.getElementById('badge').textContent = 'API unavailable';
+    });
+  </script>
+</body>
+</html>

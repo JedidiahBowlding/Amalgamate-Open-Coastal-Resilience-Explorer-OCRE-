@@ -2,6 +2,9 @@
 
 This folder is reserved for the pilot frontend.
 
+Current MVP dashboard file:
+- `dashboard.html`
+
 Suggested quick start:
 
 ```bash

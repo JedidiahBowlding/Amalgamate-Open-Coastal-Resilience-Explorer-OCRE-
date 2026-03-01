@@ -262,6 +262,43 @@ def build_mvp_output(
     return output
 
 
+def build_interpretive_summary(mvp: dict[str, Any]) -> str:
+    location = str(mvp.get("location", "the selected location"))
+    data_range = str(mvp.get("data_range", "the study period"))
+    trend = mvp.get("mean_trend_mm_per_year")
+    trend_text = "an unknown rate"
+    if isinstance(trend, (int, float)):
+        trend_text = f"{trend:.1f} mm per year"
+
+    extremes = mvp.get("extreme_events", [])
+    top_extreme = None
+    if isinstance(extremes, list) and extremes:
+        top_extreme = extremes[0]
+
+    extreme_text = "Historical extreme water levels were identified during major storm events."
+    if isinstance(top_extreme, dict) and "level_m" in top_extreme:
+        extreme_text = (
+            f"Historical extreme water levels exceeded {float(top_extreme['level_m']):.2f} meters "
+            "during major storm events."
+        )
+
+    comparison = mvp.get("observation_comparison")
+    comparison_text = ""
+    if isinstance(comparison, dict):
+        nearest_station = comparison.get("nearest_station", {})
+        station_id = nearest_station.get("station_id", "unknown") if isinstance(nearest_station, dict) else "unknown"
+        obs_count = comparison.get("observation_count", 0)
+        comparison_text = (
+            f" Observational data from NOAA station {station_id} ({obs_count:,} records) "
+            "supports local long-term trend interpretation."
+        )
+
+    return (
+        f"Between {data_range}, modeled water levels near {location} increased at an average rate of {trend_text}. "
+        f"{extreme_text}{comparison_text}"
+    )
+
+
 def export_outputs(output_dir: Path, timeseries_df: pd.DataFrame, mvp_payload: dict[str, Any]) -> None:
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -309,6 +346,8 @@ def main() -> None:
             "nearest_station": nearest,
             "observation_count": int(len(obs_df)),
         }
+
+    mvp["interpretive_summary"] = build_interpretive_summary(mvp)
 
     export_outputs(args.output_dir, ts_df, mvp)
 
